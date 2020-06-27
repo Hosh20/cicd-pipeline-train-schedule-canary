@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         //be sure to replace "willbla" with your own Docker Hub username
-        DOCKER_IMAGE_NAME = "willbla/train-schedule"
+        DOCKER_IMAGE_NAME = "hosh20/train-schedule"
     }
     stages {
         stage('Build') {
@@ -36,6 +36,21 @@ pipeline {
                         app.push("latest")
                     }
                 }
+            }
+        }
+        stage('Deploy Cannry'){
+            evviroment{
+            canary_rpica =1
+            }
+            when {
+                branch 'master'
+            } 
+            steps {
+            kubernetesDeploy(
+                    kubeconfigId: 'kubeconfig',
+                    configs: 'train-schedule-kube.yml',
+                    enableConfigSubstitution: true
+                )
             }
         }
         stage('DeployToProduction') {
