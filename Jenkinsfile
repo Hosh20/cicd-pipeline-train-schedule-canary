@@ -39,16 +39,16 @@ pipeline {
             }
         }
         stage('Deploy Cannry'){
-            evviroment{
-            canary_rpica =1
-            }
             when {
                 branch 'master'
             } 
+            environment {
+                CANARY_REPLICAS =1
+                        }
             steps {
             kubernetesDeploy(
                     kubeconfigId: 'kubeconfig',
-                    configs: 'train-schedule-kube.yml',
+                    configs: 'train-schedule-kube-canary.yml',
                     enableConfigSubstitution: true
                 )
             }
@@ -60,6 +60,13 @@ pipeline {
             steps {
                 input 'Deploy to Production?'
                 milestone(1)
+           
+                 CANARY_REPLICAS =0
+                 kubernetesDeploy(
+                    kubeconfigId: 'kubeconfig',
+                    configs: 'train-schedule-kube-canary.yml',
+                    enableConfigSubstitution: true
+                )
                 kubernetesDeploy(
                     kubeconfigId: 'kubeconfig',
                     configs: 'train-schedule-kube.yml',
